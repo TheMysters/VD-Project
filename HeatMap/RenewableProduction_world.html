@@ -1,0 +1,343 @@
+<html>
+   <head>
+      <script src="https://d3js.org/d3.v7.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+      <style>
+        #line {
+          width: 300px;
+          height: 10px;
+          background-color: lightgray;
+          position: relative;
+        }
+        
+        #button {
+          width: 30px;
+          height: 10px;
+          background-color: blue;
+          position: absolute;
+          left: 0;
+          top: -10px;
+          cursor: move;
+        }
+      </style>
+   </head>
+   <body>
+
+   </body>
+
+   <script>
+    var width = 1000;
+    var height = 470;
+
+    var year = 1965;
+
+    const container = d3.select("body")
+                        .append("div")
+                        .style("display", "flex")
+                        .style("align-items", "center")
+                        .style("justify-content", "center");
+    
+    const svg = container.append("svg")
+                        .attr("width", width)
+                        .attr("height", height);  
+
+    svg.append("text")
+       .attr("x", width / 2)
+       .attr("y", 20)
+       .attr("text-anchor", "middle")
+       .text("Map of Country Renewable energy production (in TWh) Over Time");
+  
+    const projection = d3.geoNaturalEarth1()
+                         .scale(150)
+                         .translate([width / 2, height / 2]);
+  
+    const path = d3.geoPath().projection(projection);
+
+    const selectedYear = 1965;
+    year = parseInt(selectedYear);
+    d3.json("world_map.json").then(function (mapData) {
+      d3.csv("../dataset/data_renewable_electricity.csv").then(function (arrayData) {
+
+        const dataDict = {};
+        const excludedCountries = ["World", "Early-demographic dividend", "Upper middle income", "Post-demographic dividend" ,"Pre-demographic dividend", "OECD members", "Middle income", "Low & middle income", "Low income", "Lower middle income", "Late-demographic dividend", "IDA total", "IDA only", "IDA blend", "IDA & IBRD total", "IBRD only", "North America", "Small states", "Central Europe and the Baltics", "Africa Western and Central", "Africa Eastern and Southern"];
+
+        arrayData.forEach((d) => {
+          const country = d["Country/Area"];
+          const value = parseFloat(d["Heat Generation"]);
+          if (dataDict[country] == null ){dataDict[country] = 0;}
+          if (!excludedCountries.includes(country) && d["Year"] === String(year)) {
+            dataDict[country] += value; 
+          }
+        });
+
+        mapData.features.forEach((feature) => {
+          const country = feature.properties.name;
+          const value = dataDict[country];
+
+          feature.properties.value = value || null;
+        });
+
+        let minValue = Infinity;
+        let maxValue = -Infinity;
+
+        for (const country in dataDict) {
+          if (!excludedCountries.includes(country)) {
+            const value = dataDict[country];
+            if(value != null){
+              if (value < minValue){
+                minValue = value;
+              }
+              if (value > maxValue){
+                maxValue = value;
+              }
+            }
+          }
+        }
+         //Legend
+         const legendWidth = 80;
+         const legendHeight = 200;
+         const legendMargin = { top: 20, right: 10, bottom: 20, left: 10 };
+         
+         const legendContainer = container.append("svg")
+                                          .attr("width", legendWidth + legendMargin.left + legendMargin.right)
+                                          .attr("height", legendHeight + legendMargin.top + legendMargin.bottom)
+                                          .style("margin-top", "10px")
+ 
+         legendContainer.attr("class", "legend-svg");
+         
+         const gradient = legendContainer.append("defs")
+                                         .append("linearGradient")
+                                         .attr("id", "gradient")
+                                         .attr("x1", "0%")
+                                         .attr("y1", "100%")
+                                         .attr("x2", "0%")
+                                         .attr("y2", "0%");
+         
+         gradient.append("stop")
+                 .attr("offset", "0%")
+                 .attr("stop-color", "blue");
+         
+         gradient.append("stop")
+                 .attr("offset", "100%")
+                 .attr("stop-color", "red");
+         
+         legendContainer.append("rect")
+                        .attr("x", legendMargin.left)
+                        .attr("y", legendMargin.top)
+                        .attr("width", legendWidth)
+                        .attr("height", legendHeight)
+                        .style("fill", "url(#gradient)");
+ 
+          const formatValue = (value) => {
+            if (value !== null) {
+              if (Math.abs(value) >= 1e9) {return (value / 1e9).toFixed(2) + "G";} 
+              else if (Math.abs(value) >= 1e6) {return (value / 1e6).toFixed(2) + "M";} 
+              else if (Math.abs(value) >= 1e3) {return (value / 1e3).toFixed(2) + "k";} 
+              else {return value.toFixed(2);}
+            }
+            return "NA/0";
+          };
+
+         const legendTextY = [legendMargin.top + 10, (legendHeight / 2) + legendMargin.top, legendHeight + legendMargin.top - 10];
+         const legendText = [ formatValue(maxValue), formatValue((minValue + maxValue) / 2), formatValue(minValue) ];
+         legendContainer.selectAll("text")
+                        .data(legendText)
+                        .enter()
+                        .append("text")
+                        .attr("x", legendMargin.left + legendWidth - 5)
+                        .attr("y", (d, i) => legendTextY[i])
+                        .attr("text-anchor", "end")
+                        .attr("dominant-baseline", "middle")
+                        .style("fill", "black")
+                        .style("font-size", "16px")
+                        .style("font-weight", "bold") 
+                        .text((d) => d);
+    });
+  });
+
+  function update(){
+    const selectedYear = d3.select("#value").text();
+    year = parseInt(selectedYear);
+    svg.selectAll("path").remove();
+
+    d3.json("world_map.json").then(function (mapData) {
+      d3.csv("../dataset/data_renewable_electricity.csv").then(function (arrayData) {
+  
+        const dataDict = {};
+        const excludedCountries = ["World", "Early-demographic dividend", "Upper middle income", "Post-demographic dividend" ,"Pre-demographic dividend", "OECD members", "Middle income", "Low & middle income", "Low income", "Lower middle income", "Late-demographic dividend", "IDA total", "IDA only", "IDA blend", "IDA & IBRD total", "IBRD only", "North America", "Small states", "Central Europe and the Baltics", "Africa Western and Central", "Africa Eastern and Southern"];
+
+        arrayData.forEach((d) => {
+          const country = d["Entity"];
+          const value_wind = parseFloat(d["Electricity from wind (TWh)"]);
+          const value_hydro = parseFloat(d["Electricity from hydro (TWh)"]);
+          const value_solar = parseFloat(d["Electricity from solar (TWh)"]);
+          const value_other = parseFloat(d["Other renewables including bioenergy (TWh)"]);
+          const value = value_wind + value_hydro + value_solar + value_other;
+          if (dataDict[country] == null ){dataDict[country] = 0;}
+          if (!excludedCountries.includes(country) && d["Year"] === String(year)) {
+            dataDict[country] = value; 
+          }
+        });
+
+        console.log(dataDict);
+
+        mapData.features.forEach((feature) => {
+          const country = feature.properties.name;
+          const value = dataDict[country];
+  
+          feature.properties.value = value || null;
+        });
+  
+        let minValue = Infinity;
+        let maxValue = -Infinity;
+  
+        for (const country in dataDict) {
+          if (!excludedCountries.includes(country)) {
+            const value = dataDict[country];
+            if(value != null){
+              if (value < minValue){
+                minValue = value;
+              }
+              if (value > maxValue){
+                maxValue = value;
+              }
+            }
+            else {
+              dataDict[country] = 0;
+            }
+          }
+        }
+  
+        const colorScale = d3.scaleSequential()
+                             .interpolator(d3.interpolateRgb("steelblue", "brown"))
+                             .domain([minValue, maxValue]);
+
+        //Render the map
+        const tooltip = d3.select("body")
+                          .append("div")
+                          .attr("class", "tooltip")
+                          .style("opacity", 0)
+                          .style("position", "absolute")
+                          .style("background-color", "white")
+                          .style("border", "1px solid #ccc")
+                          .style("padding", "10px")
+                          .style("text-align", "center")
+                          .style("font-size", "12px")
+                          .style("color", "black");
+
+        svg.selectAll("path")
+           .data(mapData.features)
+           .enter()
+           .append("path")
+           .attr("d", path)
+           .attr("fill", (d) => {
+             const value = d.properties.value;
+             return value ? colorScale(value) : "gray";
+           })
+           .on("mouseover", (event, d) => {
+              tooltip.transition()
+                     .duration(200)
+                     .style("opacity", 0.9);
+              tooltip.html(`Country: ${d.properties.name}<br>Year: ${year}<br>Renewable energy production: ${formatValue(d.properties.value)}`)
+                     .style("left", (event.pageX) + "px")
+                     .style("top", (event.pageY - 28) + "px");
+           })
+           .on("mouseout", () => {
+              tooltip.transition()
+                     .duration(500)
+                     .style("opacity", 0);
+           });
+
+          //Legend
+          const legendWidth = 80;
+          const legendHeight = 200;
+          const legendMargin = { top: 20, right: 10, bottom: 20, left: 10 }; 
+
+          const formatValue = (value) => {
+            if (value !== null) {
+              if (Math.abs(value) >= 1e9) {return (value / 1e9).toFixed(2) + "G";} 
+              else if (Math.abs(value) >= 1e6) {return (value / 1e6).toFixed(2) + "M";} 
+              else if (Math.abs(value) >= 1e3) {return (value / 1e3).toFixed(2) + "k";} 
+              else {return value.toFixed(2);}
+            }
+            return "NA/0";
+          };
+
+          const legendContainer = d3.select("body").select("div").select("svg.legend-svg");
+          const legendTextY = [legendMargin.top + 10, (legendHeight / 2) + legendMargin.top, legendHeight + legendMargin.top - 10];
+          const legendText = [ formatValue(maxValue), formatValue((minValue + maxValue) / 2), formatValue(minValue) ];
+
+          legendContainer.selectAll("text")
+                         .data(legendText)
+                         .join("text")
+                         .attr("x", legendMargin.left + legendWidth - 5)
+                         .attr("y", (d, i) => legendTextY[i])
+                         .attr("text-anchor", "end")
+                         .attr("dominant-baseline", "middle")
+                         .style("fill", "black")
+                         .style("font-size", "16px")
+                         .style("font-weight", "bold") 
+                         .text((d) => d);
+       
+      });
+    });
+  } 
+  //Scroll Button
+  const lineDiv = d3.select("body")
+                    .append("div")
+                    .attr("id", "line")
+                    .style("width", "100%")
+                    .style("height", "10px")
+                    .style("background-color", "lightgray")
+                    .style("margin", "0 auto");
+
+  const paragraph = d3.select("body")
+                      .append("p")
+                      .style("text-align", "center");
+
+  paragraph.append("text")
+           .text("Current Year: ");
+
+  paragraph.append("span")
+           .attr("id", "value")
+           .text("1965")
+           .style("display", "inline-block");
+
+  const initialValue = 1965;
+  const maxValue = 2022;
+
+  const line = d3.select("#line")
+                 .style("width", "300px")
+                 .style("height", "10px")
+                 .style("background-color", "lightgray");
+
+  const buttonContainer = d3.select("#line")
+                            .append("div")
+                            .style("display", "flex")
+                            .style("align-items", "center")
+                            .style("justify-content", "flex-start");
+  
+  const button = buttonContainer.append("div")
+                                .attr("id", "button")
+                                .style("width", "30px")
+                                .style("height", "30px")
+                                .style("background-color", "blue")
+                                .style("cursor", "move");
+
+  const drag = d3.drag().on("drag", function (event) {
+      const x = event.x;
+      if (x >= 0 && x <= 300) {
+        const value = Math.round((x / 300) * (maxValue - initialValue) + initialValue);
+        document.getElementById("value").textContent = value;
+        d3.select(this).style("margin-left", `${x}px`);
+        update();
+      }
+    });
+    
+  button.call(drag);
+
+  update();
+
+   </script>
+
+</html> 
