@@ -62,10 +62,9 @@
         const excludedCountries = ["World", "Early-demographic dividend", "Upper middle income", "Post-demographic dividend" ,"Pre-demographic dividend", "OECD members", "Middle income", "Low & middle income", "Low income", "Lower middle income", "Late-demographic dividend", "IDA total", "IDA only", "IDA blend", "IDA & IBRD total", "IBRD only", "North America", "Small states", "Central Europe and the Baltics", "Africa Western and Central", "Africa Eastern and Southern"];
 
         arrayData.forEach((d) => {
-          const values = d["country_code;country_name;year;value"].split(";");
-          const country = values[1];
-          const value = parseFloat(values[3]);
-          if (!excludedCountries.includes(country) && values[2] === String(year)) {
+          const country = d["country_name"];
+          const value = parseFloat(d["value"]);
+          if (!excludedCountries.includes(country) && d["year"] === String(year)) {
             dataDict[country] = value; //Kilotons
           }
         });
@@ -165,10 +164,9 @@
         const excludedCountries = ["World", "Early-demographic dividend", "Upper middle income", "Post-demographic dividend" ,"Pre-demographic dividend", "OECD members", "Middle income", "Low & middle income", "Low income", "Lower middle income", "Late-demographic dividend", "IDA total", "IDA only", "IDA blend", "IDA & IBRD total", "IBRD only", "North America", "Small states", "Central Europe and the Baltics", "Africa Western and Central", "Africa Eastern and Southern"];
   
         arrayData.forEach((d) => {
-          const values = d["country_code;country_name;year;value"].split(";");
-          const country = values[1];
-          const value = parseFloat(values[3]);
-          if (!excludedCountries.includes(country) && values[2] === String(year)) {
+          const country = d["country_name"];
+          const value = parseFloat(d["value"]);
+          if (!excludedCountries.includes(country) && d["year"] === String(year)) {
             dataDict[country] = value; //Kilotons
           }
         });

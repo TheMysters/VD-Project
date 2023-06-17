@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Line Chart with D3.js</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+
+    </style>
+  </head>
+  <body>
+
+  </body>
+
+  <script>
+    d3.csv("../dataset/data_co2_limited.csv").then(function(arrayData) {
+        
+        const dataDict = {};
+        const excludedCountries = ["World", "Early-demographic dividend", "Upper middle income", "Post-demographic dividend" ,"Pre-demographic dividend", "OECD members", "Middle income", "Low & middle income", "Low income", "Lower middle income", "Late-demographic dividend", "IDA total", "IDA only", "IDA blend", "IDA & IBRD total", "IBRD only", "North America", "Small states", "Central Europe and the Baltics", "Africa Western and Central", "Africa Eastern and Southern"];
+
+        arrayData.forEach((d) => {
+            const country = d["country_name"];
+            const value = parseFloat(d["value"]);
+            const year = d["year"];
+            if (dataDict[country] == null) {dataDict[country] = {};}
+            if (!excludedCountries.includes(country)) {
+                dataDict[country][year] = value;
+            }
+
+        }); 
+
+        const years = Object.keys(dataDict["France"]);
+        const values_FR = Object.values(dataDict["France"]);
+        const values2_US = Object.values(dataDict["United States"]);
+        const values3_RS = Object.values(dataDict["Russia"]);
+        const values4_CN = Object.values(dataDict["China"]);
+        const values5_BR = Object.values(dataDict["Japan"]);
+        const values6_UK = Object.values(dataDict["United Kingdom"]);
+
+        var width = 700; 
+        var height = 500; 
+        var margin = {top: 20, bottom: 70, left: 80, right: 20}; 
+        var width = 600 - margin.left - margin.right; 
+        var height = 550 - margin.top - margin.bottom; 
+        var barPadding = 4;
+        var barWidth = width / years.length - barPadding;   
+
+        const colors = ["red", "blue", "green", "orange", "purple"];
+        const allValues = [d3.max(values_FR), d3.max(values2_US), d3.max(values3_RS), d3.max(values4_CN), d3.max(values5_BR), d3.max(values6_UK)];
+        
+        const x = d3.scaleBand()
+                    .domain(years)
+                    .range([0, width]);
+    
+        const y = d3.scaleLinear()
+                    .domain([0, d3.max(allValues)])
+                    .range([height, 0]);
+    
+        var xAxis = d3.axisBottom()
+                    .scale(x)
+                    .tickFormat(function(d, i) {
+                        if (i % 5 === 0) {return d;} 
+                        else {return "";}
+                    });   
+        var yAxis = d3.axisLeft()
+                      .scale(y);
+
+        const container = d3.select("body")
+                            .append("div")
+                            .style("display", "flex")
+                            .style("align-items", "center")
+                            .style("justify-content", "center");
+    
+        var svg = container.append("svg")
+                           .attr("width", width + margin.left + margin.right)
+                           .attr("height", height + margin.bottom + margin.top)
+                           .style("background-color", "lightblue")
+                           .append("g") 
+                           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .selectAll("text")
+            .style("text-anchor", "middle");
+    
+        svg.append("text")
+            .attr("x", (width / 2))
+            .attr("y", (height + (margin.bottom / 2)))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("Year");
+    
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .style("text-anchor", "end");
+    
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", 0 - (height / 2)) .attr("y", 0 -margin.left)
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("CO2 Emissions (in Kilotons)");
+    
+        svg.append("text")
+            .attr("x", (width / 2))
+            .attr("y", 0 - (margin.top / 20))
+            .style("text-anchor", "middle")
+            .style("font-size", "1.5em")
+            .text("CO2 Emissions over the year");
+    
+        var valueline = d3.line()
+                          .curve(d3.curveLinear)
+                          .x(function(d, i) { return x(years[i]); })
+                          .y(function(d) { return y(d); });
+
+        const legendLabels = ["France", "United States", "Russia", "China", "Japan", "United Kingdom"];
+
+        legendLabels.forEach(function(element, index) {
+            var linechart = svg.append("path")
+              .attr("class", "line")
+              .attr("d", valueline(Object.values(dataDict[element])))
+              .style("stroke", colors[index])
+              .style("fill", "none");
+        });
+
+        d3.select("body").append("div").attr("id", "legend");
+        const legend = d3.select("#legend")
+                         .style("position", "absolute")
+                         .style("right", "220px")
+                         .style("top", "180px")
+                         .append("svg")
+                         .attr("class", "legend")
+                         .attr("width", 120)
+                         .attr("height", 100)
+                         .selectAll("g")
+                         .data(legendLabels)
+                         .enter()
+                         .append("g")
+                         .attr("transform", function(d, i) {
+                            return "translate(0," + i * 20 + ")";
+                         });
+
+        legend.append("rect")
+              .attr("x", 10)
+              .attr("y", 10)
+              .attr("width", 10)
+              .attr("height", 10)
+              .style("fill", function(d, i) {
+                return colors[i];
+              });
+
+        legend.append("text")
+             .attr("x", 25)
+             .attr("y", 19)
+             .text(function(d) {
+                return d;
+             });
+
+      });
+      
+</script>
+</html>

@@ -62,13 +62,17 @@
         const excludedCountries = ["World", "Early-demographic dividend", "Upper middle income", "Post-demographic dividend" ,"Pre-demographic dividend", "OECD members", "Middle income", "Low & middle income", "Low income", "Lower middle income", "Late-demographic dividend", "IDA total", "IDA only", "IDA blend", "IDA & IBRD total", "IBRD only", "North America", "Small states", "Central Europe and the Baltics", "Africa Western and Central", "Africa Eastern and Southern"];
 
         arrayData.forEach((d) => {
-          const country = d["Country/Area"];
-          const value = parseFloat(d["Heat Generation"]);
+          const country = d["Entity"];
+          const value_wind = parseFloat(d["Electricity from wind (TWh)"]);
+          const value_hydro = parseFloat(d["Electricity from hydro (TWh)"]);
+          const value_solar = parseFloat(d["Electricity from solar (TWh)"]);
+          const value_other = parseFloat(d["Other renewables including bioenergy (TWh)"]);
+          const value = value_wind + value_hydro + value_solar + value_other;
           if (dataDict[country] == null ){dataDict[country] = 0;}
           if (!excludedCountries.includes(country) && d["Year"] === String(year)) {
-            dataDict[country] += value; 
+            dataDict[country] = value; 
           }
-        });
+        }); 
 
         mapData.features.forEach((feature) => {
           const country = feature.properties.name;
