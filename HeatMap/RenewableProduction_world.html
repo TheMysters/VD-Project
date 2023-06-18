@@ -63,10 +63,10 @@
 
         arrayData.forEach((d) => {
           const country = d["Entity"];
-          const value_wind = parseFloat(d["Electricity from wind (TWh)"]);
-          const value_hydro = parseFloat(d["Electricity from hydro (TWh)"]);
-          const value_solar = parseFloat(d["Electricity from solar (TWh)"]);
-          const value_other = parseFloat(d["Other renewables including bioenergy (TWh)"]);
+          const value_wind = parseFloat(d["Electricity from wind (TWh)"]) || 0;
+          const value_hydro = parseFloat(d["Electricity from hydro (TWh)"]) || 0;
+          const value_solar = parseFloat(d["Electricity from solar (TWh)"]) || 0;
+          const value_other = parseFloat(d["Other renewables including bioenergy (TWh)"]) || 0;
           const value = value_wind + value_hydro + value_solar + value_other;
           if (dataDict[country] == null ){dataDict[country] = 0;}
           if (!excludedCountries.includes(country) && d["Year"] === String(year)) {

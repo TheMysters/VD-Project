@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+
+    </style>
+  </head>
+  <body>
+
+  </body>
+
+  <script>
+    d3.csv("../dataset/data_renewable_electricity.csv").then(function(arrayData) {
+         
+        const dataDict = {};
+        const excludedCountries = ["World", "Early-demographic dividend", "Upper middle income", "Post-demographic dividend" ,"Pre-demographic dividend", "OECD members", "Middle income", "Low & middle income", "Low income", "Lower middle income", "Late-demographic dividend", "IDA total", "IDA only", "IDA blend", "IDA & IBRD total", "IBRD only", "North America", "Small states", "Central Europe and the Baltics", "Africa Western and Central", "Africa Eastern and Southern"];
+
+        arrayData.forEach((d) => {
+            const country = d["Entity"];
+            const year = d["Year"];
+            const value_wind = parseFloat(d["Electricity from wind (TWh)"]) || 0;
+            const value_hydro = parseFloat(d["Electricity from hydro (TWh)"]) || 0;
+            const value_solar = parseFloat(d["Electricity from solar (TWh)"]) || 0;
+            const value_other = parseFloat(d["Other renewables including bioenergy (TWh)"]) || 0;
+            const value = value_wind + value_hydro + value_solar + value_other;
+            if (dataDict[country] == null) {
+                dataDict[country] = {};
+            }
+            for (let y = 1965; y <= 2021; y++) {
+                if (!dataDict[country][y]) {
+                dataDict[country][y] = 0;
+                }
+            }
+            if (!excludedCountries.includes(country)) {
+                dataDict[country][year] = value;
+            }
+        }); 
+
+        const totalEmissions = {};
+
+        //Total CO2 emissions for each year
+        Object.entries(dataDict).forEach(([country, countryData]) => {
+            Object.entries(countryData).forEach(([year, value]) => {
+              if (year !== "2022") { // Exclude values for year 2022
+                if (!totalEmissions[year]) { totalEmissions[year] = 0; }
+                totalEmissions[year] += value;
+              }
+            });
+        });
+
+        const percentageData = {};
+
+        //Percentage contribution of each country for each year
+        Object.entries(dataDict).forEach(([country, countryData]) => {
+            percentageData[country] = {};
+            Object.entries(countryData).forEach(([year, value]) => {
+              if (year !== "2022") { // Exclude values for year 2022
+                if (value == null) { value = 0; }
+                const percentage = (value / totalEmissions[year]) * 100;
+                percentageData[country][year] = percentage;
+              }
+            });
+          });
+
+        const chartData = [];
+
+        //Data
+        Object.entries(percentageData).forEach(([country, countryData]) => {
+            const data = Object.entries(countryData).map(([year, percentage]) => ({
+              year: String(year),
+              country: country,
+              percentage: percentage,
+            }));
+            chartData.push(...data);
+        });
+
+        const years = [1960, 1961, 1962, 1963, 1964, 1965, 1966];
+
+        var margin = {top: 40, bottom: 70, left: 80, right: 150}; 
+        var width = 800 - margin.left - margin.right; 
+        var height = 550 - margin.top - margin.bottom;
+
+        const container = d3.select("body")
+                            .append("div")
+                            .style("display", "flex")
+                            .style("align-items", "center")
+                            .style("justify-content", "center");
+
+        var svg = container.append("svg")
+                            .attr("width", width + margin.left + margin.right)
+                            .attr("height", height + margin.bottom + margin.top)
+                            .style("background-color", "lightblue")
+                            .append("g") 
+                            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        const x = d3.scaleLinear()
+                    .domain(d3.extent(chartData, function(d) { return d.year; }))
+                    .range([ 0, width ]);
+
+        svg.append("g")
+           .attr("transform", `translate(0, ${height})`)
+           .call(d3.axisBottom(x)
+           .tickFormat(function(d, i) {
+                if (i % 1 === 0) {return d;} 
+                else {return "";}
+            })
+        );
+
+        const y = d3.scaleLinear()
+                    .domain([0, 100])
+                    .range([ height, 0 ]);
+
+        svg.append("g")
+           .call(d3.axisLeft(y));
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(x)
+            .selectAll("text")
+            .style("text-anchor", "middle");
+                    
+        svg.append("text")
+            .attr("x", (width / 2))
+            .attr("y", (height + (margin.bottom / 2)))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("Year");
+    
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(y)
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .style("text-anchor", "end");
+    
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", 0 - (height / 2)) .attr("y", 0 -margin.left)
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("Percentage of Renewable energy production (in TWh)");
+    
+        svg.append("text")
+            .attr("x", (width / 2))
+            .attr("y", 0 - (margin.top / 3))
+            .style("text-anchor", "middle")
+            .style("font-size", "1.5em")
+            .text("Percentage of Renewable energy production by country over time");
+
+        const colors = ["red", "blue", "green", "orange", "purple", "yellow"];
+        const colors_dict = {"France": "red", "United States": "blue", "Russia": "green", "China": "orange", "India": "purple", "United Kingdom": "yellow"};
+        const selected_countries = ["France", "United States", "Russia", "China", "India", "United Kingdom"]
+        const otherGroupLabel = "Other";
+        const otherGroupColor = "gray";
+        
+        const sumstat = d3.group(chartData, d => d.year);
+        
+        const mygroups = Array.from(new Set(chartData.map(d => d.country))); // Array of unique country names
+
+        let mygroup = mygroups.map((country, index) => {
+          return {
+            country,
+            group: colors_dict.hasOwnProperty(country) ? country : otherGroupLabel,
+            color: colors_dict.hasOwnProperty(country) ? colors_dict[country] : otherGroupColor,
+            index: index,
+            data: chartData.filter(d => d.country === country).map(({ year, percentage }) => ({
+                year,
+                percentage,
+              })),
+          };
+        });
+
+        const stackedData = d3.stack()
+                              .keys(mygroup.map(d => d.index))
+                              .value(function(d, key) {
+                                return d[1][key].percentage;})(sumstat);
+
+        const tooltip = d3.select("body")
+                          .append("div")
+                          .attr("class", "tooltip")
+                          .style("opacity", 0)
+                          .style("position", "absolute")
+                          .style("background-color", "white")
+                          .style("border", "1px solid #ccc")
+                          .style("padding", "10px")
+                          .style("text-align", "center")
+                          .style("font-size", "12px")
+                          .style("color", "black");                              
+        
+        svg.selectAll("mylayers")
+           .data(stackedData)
+           .join("path")
+           .style("fill", function(d) {
+                return mygroup.find(group => group.index === d.key).color;
+            })
+           .attr("d", d3.area()
+                        .x(function(d, i) {return x(d.data[0]);})
+                        .y0(function(d) {return y(d[0]);})
+                        .y1(function(d) {return y(d[1]);})
+            )
+            .on("mouseover", (event, d) => {
+                tooltip.transition()
+                .duration(200)
+                .style("opacity", 0.9);
+                tooltip.html(`Country: ${mygroup.find(group => group.index === d.key).country}<br>`) //Year: ${year}<br>Percentage of CO2 Emissions: ${formatValue(d.properties.value)
+                .style("left", (event.pageX) + "px")
+                .style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", () => {
+                tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+            });
+
+        selected_countries.forEach((country, index) => {
+            svg.append("text")
+               .attr("x", width + 30)
+               .attr("y", 150 + index * 20)
+               .style("fill", colors[index])
+               .text(country);
+        });
+        svg.append("text")
+            .attr("x", width + 30)
+            .attr("y", 150 + 6 * 20)
+            .style("fill", "gray")
+            .text("Other");
+
+    });
+      
+</script>
+</html>

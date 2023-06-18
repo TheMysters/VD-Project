@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Simple Line Chart with D3.js</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
 
@@ -33,7 +32,7 @@
         const values2_US = Object.values(dataDict["United States"]);
         const values3_RS = Object.values(dataDict["Russia"]);
         const values4_CN = Object.values(dataDict["China"]);
-        const values5_BR = Object.values(dataDict["Japan"]);
+        const values5_IN = Object.values(dataDict["India"]);
         const values6_UK = Object.values(dataDict["United Kingdom"]);
 
         var width = 700; 
@@ -45,7 +44,7 @@
         var barWidth = width / years.length - barPadding;   
 
         const colors = ["red", "blue", "green", "orange", "purple"];
-        const allValues = [d3.max(values_FR), d3.max(values2_US), d3.max(values3_RS), d3.max(values4_CN), d3.max(values5_BR), d3.max(values6_UK)];
+        const allValues = [d3.max(values_FR), d3.max(values2_US), d3.max(values3_RS), d3.max(values4_CN), d3.max(values5_IN), d3.max(values6_UK)];
         
         const x = d3.scaleBand()
                     .domain(years)
@@ -118,7 +117,7 @@
                           .x(function(d, i) { return x(years[i]); })
                           .y(function(d) { return y(d); });
 
-        const legendLabels = ["France", "United States", "Russia", "China", "Japan", "United Kingdom"];
+        const legendLabels = ["France", "United States", "Russia", "China", "India", "United Kingdom"];
 
         legendLabels.forEach(function(element, index) {
             var linechart = svg.append("path")
