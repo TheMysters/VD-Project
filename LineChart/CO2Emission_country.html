@@ -3,11 +3,27 @@
   <head>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-
+        .button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+          }
+        p {
+          margin-top: 20px;
+        }
+        h1 {
+          text-align: center;
+        }
     </style>
   </head>
   <body>
-
+    <button class="button" onclick="window.location.href='/home.html'">Home</button>
   </body>
 
   <script>
@@ -160,6 +176,33 @@
                 return d;
              });
 
+        const createHTMLElement = (tag, text) => {
+          const element = document.createElement(tag);
+          element.innerHTML = text;
+          return element;
+        };
+    
+        const container2 = document.createElement("div");
+        const heading1 = createHTMLElement("h1", "CO2 Emissions Analysis");
+        container2.appendChild(heading1);
+        const heading2 = createHTMLElement("h2", "Observations on CO2 Emissions");
+        container2.appendChild(heading2);
+    
+        const observations = [
+          { country: "France", observation: "The line representing CO2 emissions in France may show a relatively stable or slightly declining trend. This can be attributed to France's significant investment in nuclear energy, which produces low levels of CO2 emissions compared to fossil fuel-based energy sources." },
+          { country: "United States", observation: "The line depicting CO2 emissions in the United States may show a fluctuating pattern. This fluctuation can be influenced by factors such as economic growth, energy consumption, and shifts in energy production methods. The US has a diverse energy mix, with a significant portion still reliant on fossil fuels." },
+          { country: "Russia", observation: "The line representing CO2 emissions in Russia may exhibit fluctuations over time. Russia is known for its vast reserves of fossil fuels, including natural gas and coal. Changes in energy consumption, industrial activity, and energy efficiency measures can contribute to variations in CO2 emissions." },
+          { country: "China", observation: "The line representing CO2 emissions in China may show a significant upward trend. China is the world's largest emitter of CO2, primarily due to its reliance on coal for electricity generation and rapid industrial growth. In recent years, China has made efforts to curb emissions through renewable energy deployment and transitioning to cleaner technologies." },
+          { country: "India", observation: "The line depicting CO2 emissions in India is likely to show a rising trend. As one of the world's most populous countries, India has experienced rapid industrialization and urbanization, leading to increased energy consumption and CO2 emissions. Efforts to transition to cleaner energy sources are underway, but the impact may not be fully reflected in the historical data." }
+          ];
+    
+        observations.forEach(({ country, observation }) => {
+          const countryHeading = createHTMLElement("h3", country);
+          const countryObservation = createHTMLElement("p", observation);
+          container2.appendChild(countryHeading);
+          container2.appendChild(countryObservation);
+        });
+        document.body.appendChild(container2);
       });
       
 </script>

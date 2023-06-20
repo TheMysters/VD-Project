@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <header>
+        <nav>
+          <div class="button-container">
+            <button><span>Line Charts</span></button>
+            <button><span>Stacked Charts</span></button>
+            <button><span>Heat Map</span></button>
+          </div>
+          <div id="options" style="display: none;">
+            <button >CO2 Emissions</button>
+            <button >Production of Renewable Energy</button>
+          </div>
+        </nav>
+        <style>
+          header {
+            background-color: #4CAF50;
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: calc(100% - 20px);
+            padding: 10px;
+            border-radius: 50px;
+          }
+          button {
+            display: inline-block; 
+            margin-right: 20px;
+            border: none;
+            background-color: #4CAF50;
+            cursor: pointer;
+          }
+          .button-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+          }
+          button, button span {
+            display: inline-block;
+            padding: 5px;
+            color: white;
+            font-size: 22px;
+            transition: font-size 0.2s;
+          }
+          button:hover span {
+            font-size: 28px;
+          }
+          #options {
+            text-align: center;
+            margin-top: 2px;
+          }
+          #options button {
+            margin-right: 10px;
+            padding: 5px 10px;
+            font-size: 18px;
+          }
+          body {
+            padding-top: 70px;
+        }
+          </style>
+        <script >
+            const buttons = document.querySelectorAll('.button-container button');
+            const optionsDiv = document.getElementById('options');
+
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    if (optionsDiv.style.display === 'none') {optionsDiv.style.display = 'block';} 
+                    else {optionsDiv.style.display = 'none';}
+
+                    while (optionsDiv.firstChild) {optionsDiv.firstChild.remove();}
+
+                    const co2Option = document.createElement('button');
+                    co2Option.textContent = 'CO2 emissions';
+                    co2Option.addEventListener('click', () => {
+                        const buttonName = button.textContent.trim();
+                        if (buttonName === 'Line Charts') {window.location.href = '/LineChart/CO2Emission_country.html';} 
+                        else if (buttonName === 'Stacked Charts'){window.location.href = '/StackedChart/CO2Emission_stacked.html';}
+                        else {window.location.href = '/HeatMap/CO2Emission_world.html';}
+                    });
+                    optionsDiv.appendChild(co2Option);
+
+                    const renewableOption = document.createElement('button');
+                    renewableOption.textContent = 'Renewable energy';
+                    renewableOption.addEventListener('click', () => {
+                        const buttonName = button.textContent.trim();
+                        if (buttonName === 'Line Charts') {window.location.href = '/LineChart/RenewableProduction_country.html';} 
+                        else if (buttonName === 'Stacked Charts'){window.location.href = '/StackedChart/RenewableProduction_stacked.html';}
+                        else {window.location.href = '/HeatMap/RenewableProduction_world.html';}
+                    });
+                    
+                optionsDiv.appendChild(renewableOption);
+                });
+            }); 
+        </script>
+    </header>
+  <title>Home Page</title>
+  <style>
+    h1 {
+      text-align: center;
+      font-size: 38px;
+    }
+    p {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+    <h1>Welcome to my Website</h1>
+    <p>
+        Join us in exploring the charts and analysis to gain insights into the critical issues of CO2 emissions and renewable energy. Together, let's take action towards a more sustainable and resilient planet.
+    </p>
+    <h2>About CO2 Emissions</h2>
+    <p>
+      Carbon dioxide (CO2) emissions are a significant contributor to climate change. The burning of fossil fuels, such as coal, oil, and natural gas, releases CO2 into the atmosphere. This greenhouse gas traps heat and leads to global warming. It is crucial to reduce CO2 emissions to mitigate the adverse effects of climate change.
+    </p>
+    <p>
+      CO2 emissions occur through various human activities, including industrial processes, transportation, electricity generation, and deforestation. The combustion of fossil fuels for energy production is the largest source of CO2 emissions globally. Power plants, vehicles, and manufacturing industries are major contributors to CO2 emissions. Additionally, deforestation and land-use changes also release significant amounts of CO2 into the atmosphere.
+    </p>
+    <p>
+      The concentration of CO2 in the Earth's atmosphere has been steadily increasing since the Industrial Revolution. Prior to the Industrial Revolution, the atmospheric CO2 concentration was around 280 parts per million (ppm). However, due to human activities, particularly the burning of fossil fuels, the concentration has surpassed 400 ppm in recent years. This increase in CO2 levels is primarily responsible for the current climate change crisis.
+    </p>
+    <p>
+      The impacts of increasing CO2 emissions and climate change are far-reaching. Rising global temperatures lead to more frequent and severe heatwaves, droughts, and extreme weather events such as hurricanes and floods. Melting glaciers and ice caps contribute to rising sea levels, threatening coastal communities and habitats. Changes in rainfall patterns and agricultural productivity also pose significant challenges to food security.
+    </p>
+    <p>
+      To address the issue of CO2 emissions, several strategies can be implemented at different levels. At the individual level, adopting sustainable practices such as reducing energy consumption, using energy-efficient appliances, and opting for renewable energy sources can help reduce personal carbon footprints. On a larger scale, governments and industries can implement policies and invest in renewable energy infrastructure, promote energy efficiency, and support research and development of low-carbon technologies.
+    </p>
+    <p>
+      Transitioning to cleaner and more sustainable forms of transportation, such as electric vehicles, and promoting public transportation and cycling can also significantly reduce CO2 emissions from the transportation sector. Furthermore, protecting and restoring forests and adopting sustainable land-use practices can act as a natural carbon sink, absorbing CO2 from the atmosphere.
+    </p>
+    <p>
+      International cooperation and agreements are crucial in addressing the global nature of CO2 emissions. The Paris Agreement, signed in 2015 by nearly all countries, aims to limit global warming to well below 2 degrees Celsius above pre-industrial levels and pursue efforts to limit the temperature increase to 1.5 degrees Celsius. The agreement emphasizes the need for countries to reduce greenhouse gas emissions, including CO2, and provide financial and technological support to developing nations.
+    </p>
+    <p>
+      Efforts to reduce CO2 emissions and combat climate change are ongoing. Many countries and organizations are actively working towards transitioning to a low-carbon economy and achieving carbon neutrality. This involves reducing CO2 emissions as much as possible and offsetting the remaining emissions through carbon sequestration and removal techniques. Carbon capture and storage (CCS) technologies, reforestation projects, and enhancing natural carbon sinks are some of the methods used for carbon offsetting.
+    </p>
+    <p>
+      In conclusion, CO2 emissions are a major driver of climate change, and it is essential to take immediate action to reduce them. Transitioning to cleaner energy sources, promoting energy efficiency, adopting sustainable practices, and implementing policies that support carbon reduction are all critical steps towards mitigating the adverse effects of climate change. By collectively addressing CO2 emissions, we can strive towards a sustainable and resilient future for generations to come.
+    </p>
+  
+    <h2>The Importance of Renewable Energy</h2>
+    <p>
+      Renewable energy plays a vital role in combating climate change and reducing CO2 emissions. Unlike fossil fuels, renewable energy sources, such as solar, wind, hydro, and geothermal, produce electricity without releasing CO2 or other harmful pollutants. By transitioning to renewable energy, we can reduce our dependence on finite fossil fuel resources and create a more sustainable future for generations to come.
+    </p>
+    <p>
+      Fossil fuels, including coal, oil, and natural gas, have been the primary sources of energy for centuries. However, their combustion releases significant amounts of CO2 and other greenhouse gases into the atmosphere, contributing to climate change. The burning of fossil fuels also leads to air pollution, smog, and adverse health effects. In contrast, renewable energy sources harness natural processes and abundant resources to generate clean electricity.
+    </p>
+    <p>
+      Solar energy is obtained from sunlight, which is converted into electricity using photovoltaic (PV) cells or concentrated solar power (CSP) systems. Solar power is one of the most abundant and widely available renewable energy sources. It is scalable and can be harnessed at various scales, from small rooftop installations to large-scale solar farms. Solar energy systems generate electricity silently and produce zero emissions during operation.
+    </p>
+    <p>
+      Wind energy harnesses the power of the wind to generate electricity. Wind turbines convert the kinetic energy of the wind into rotational motion, which is then converted into electrical energy. Wind power is a rapidly growing renewable energy source and has the potential to provide a significant portion of the world's electricity needs. Like solar energy, wind power produces zero emissions during operation.
+    </p>
+    <p>
+      Hydroelectric power utilizes the energy of flowing or falling water to generate electricity. It is one of the oldest and most widely used renewable energy sources. Hydroelectric power plants typically involve damming a river to create a reservoir and controlling the flow of water to drive turbines, which generate electricity. Hydroelectric power is reliable, efficient, and emits minimal greenhouse gases.
+    </p>
+    <p>
+      Geothermal energy harnesses the heat from the Earth's interior to generate electricity or provide direct heating. This renewable energy source relies on geothermal heat pumps or power plants to extract heat from underground reservoirs. Geothermal power is reliable, available year-round, and emits minimal greenhouse gases.
+    </p>
+    <p>
+      By embracing renewable energy sources, we can significantly reduce CO2 emissions and mitigate climate change. The deployment of renewable energy technologies not only helps in decarbonizing the electricity sector but also offers opportunities to electrify other sectors such as transportation and heating, further reducing reliance on fossil fuels.
+    </p>
+    <p>
+      Additionally, the adoption of renewable energy sources brings numerous environmental, social, and economic benefits. It reduces air and water pollution, improves public health, and decreases dependence on foreign energy sources. It also creates job opportunities and drives economic growth in the renewable energy industry. Furthermore, decentralized renewable energy systems empower communities and provide energy access to remote or underserved areas.
+    </p>
+    <p>
+      Our website aims to provide information and resources on the importance of reducing CO2 emissions and promoting the production of renewable energy. By raising awareness about renewable energy technologies and their benefits, we hope to inspire individuals, businesses, and policymakers to embrace sustainable energy solutions. Together, we can make a positive impact on the environment and work towards a greener and cleaner planet.
+    </p>
+</body>
+</html>

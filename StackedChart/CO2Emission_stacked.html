@@ -3,11 +3,27 @@
   <head>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-
+        .button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+          }
+        p {
+        margin-top: 20px;
+        }
+        h1 {
+        text-align: center;
+        }
     </style>
   </head>
   <body>
-
+    <button class="button" onclick="window.location.href='/home.html'">Home</button>
   </body>
 
   <script>
@@ -218,6 +234,34 @@
             .style("fill", "gray")
             .text("Other");
 
+        const createHTMLElement = (tag, text) => {
+            const element = document.createElement(tag);
+            element.innerHTML = text;
+            return element;
+        };
+    
+        const container2 = document.createElement("div");
+        const heading1 = createHTMLElement("h1", "CO2 Emissions Analysis");
+        container2.appendChild(heading1);
+        const heading2 = createHTMLElement("h2", "Observations on CO2 Emissions");
+        container2.appendChild(heading2);
+    
+        const observations = [
+        { country: "France & United Kingdom", observation: "The emissions for France & United Kingdom show a consistent level over time, indicating relatively stable CO2 emissions. This could be attributed to France's investment in low-carbon energy sources, such as nuclear power, which helps mitigate CO2 emissions compared to fossil fuel-based energy." },
+        { country: "United States", observation: "The emissions for the United States show a gradually increasing trend over time. This suggests that CO2 emissions in the US have been rising steadily, possibly due to factors such as industrial activities, energy consumption, and reliance on fossil fuels for electricity generation." },
+        { country: "Russia", observation: "The emissions for Russia demonstrate fluctuations over the years. Russia's CO2 emissions can be influenced by various factors, including energy consumption, industrial activities, and changes in energy efficiency measures. Fluctuations in these factors may lead to variations in CO2 emissions levels." },
+        { country: "China", observation: "The emissions for China display a significant increase and consistently high levels of CO2 emissions. As the world's largest emitter of CO2, China's emissions are primarily driven by its heavy reliance on coal for electricity generation and rapid industrial growth. However, China has recently implemented measures to reduce emissions, including promoting renewable energy and adopting cleaner technologies." },
+        { country: "India", observation: "The emissions for India exhibit a significant upward trend, indicating a rapid increase in CO2 emissions over time. As one of the world's most populous countries, India's growing industrialization and urbanization have contributed to higher energy consumption and subsequent CO2 emissions. Efforts are being made to transition to cleaner energy sources, but the impact may not be fully reflected in the historical data." },
+        { country: "Other", observation: "The emissions for the rest of the world is not so significant. CO2 emissions come from few countries."}
+        ];
+    
+        observations.forEach(({ country, observation }) => {
+        const countryHeading = createHTMLElement("h3", country);
+        const countryObservation = createHTMLElement("p", observation);
+        container2.appendChild(countryHeading);
+        container2.appendChild(countryObservation);
+        });
+        document.body.appendChild(container2);
     });
       
 </script>

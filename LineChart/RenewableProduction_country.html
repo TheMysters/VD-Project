@@ -3,11 +3,27 @@
   <head>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-
+        .button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+          }
+        p {
+          margin-top: 20px;
+        }
+        h1 {
+          text-align: center;
+        }
     </style>
   </head>
   <body>
-
+    <button class="button" onclick="window.location.href='/home.html'">Home</button>
   </body>
 
   <script>
@@ -162,7 +178,34 @@
              .text(function(d) {
                 return d;
              });
+             const createHTMLElement = (tag, text) => {
+              const element = document.createElement(tag);
+              element.innerHTML = text;
+              return element;
+            };
+            
 
+        const container2 = document.createElement("div");
+        const heading1 = createHTMLElement("h1", "Renewable Energy Production Analysis");
+        container2.appendChild(heading1);
+        const heading2 = createHTMLElement("h2", "Observations on Renewable Energy Production");
+        container2.appendChild(heading2);
+        
+        const observations = [
+          {country: "France", observation: "The line representing renewable energy production in France shows a consistent and significant increase over time. France has made substantial investments in renewable energy sources, particularly nuclear power, hydroelectric power, and wind energy, which have contributed to a reliable and sustainable energy production."},
+          {country: "United States", observation: "The line depicting renewable energy production in the United States demonstrates a gradual upward trend. The US has seen a steady growth in renewable energy capacity, driven by increased investments in solar, wind, and biomass energy. However, there is still room for further expansion to diversify the energy mix."},
+          {country: "Russia", observation: "The line representing renewable energy production in Russia shows a relatively modest growth compared to other countries. Russia's renewable energy sector has been developing gradually, with investments primarily focused on hydropower, wind power, and biomass. There is potential for further development in this sector."},
+          { country: "China", observation: "The line depicting renewable energy production in China displays a remarkable upward trend. China has become the world's leading producer of renewable energy, particularly in the areas of solar and wind power. The country has made substantial investments and implemented supportive policies to drive renewable energy production."},
+          {country: "India", observation: "The line representing renewable energy production in India exhibits a significant increase over time. India has witnessed rapid growth in renewable energy capacity, driven by ambitious targets and policy initiatives. Investments in solar, wind, and hydroelectric power have contributed to the country's renewable energy production."}
+        ];
+        
+        observations.forEach(({ country, observation }) => {
+          const countryHeading = createHTMLElement("h3", country);
+          const countryObservation = createHTMLElement("p", observation);
+          container2.appendChild(countryHeading);
+          container2.appendChild(countryObservation);
+        });
+        document.body.appendChild(container2);
       });
       
 </script>

@@ -19,10 +19,30 @@
           top: -10px;
           cursor: move;
         }
+        .button {
+          position: fixed;
+          top: 20px;
+          left: 20px;
+          padding: 10px;
+          background-color: #4CAF50;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        p {
+          margin-top: 20px;
+        }
+        h1 {
+          text-align: center;
+        }
+        li {
+          margin-bottom: 10px;
+        }
       </style>
    </head>
    <body>
-
+    <button class="button" onclick="window.location.href='/home.html'">Home</button>
    </body>
 
    <script>
@@ -83,24 +103,38 @@
 
         let minValue = Infinity;
         let maxValue = -Infinity;
-
+        let sum = 0;
+        let squaredDiffSum = 0;
+        let count = 0;
+        
         for (const country in dataDict) {
           if (!excludedCountries.includes(country)) {
             const value = dataDict[country];
-            if(value != null){
-              if (value < minValue){
-                minValue = value;
-              }
-              if (value > maxValue){
-                maxValue = value;
-              }
+            if (value < minValue) {
+              minValue = value;
             }
+            if (value > maxValue) {
+              maxValue = value;
+            }
+            sum += value;
+            count++;
           }
         }
+        
+        const mean = sum / count;
+        
+        for (const country in dataDict) {
+          if (!excludedCountries.includes(country)) {
+            const value = dataDict[country];
+            squaredDiffSum += (value - mean) ** 2;
+          }
+        }
+        
+        const std = Math.sqrt(squaredDiffSum / count);
          //Legend
          const legendWidth = 80;
          const legendHeight = 200;
-         const legendMargin = { top: 20, right: 10, bottom: 20, left: 10 };
+         const legendMargin = { top: 70, right: 10, bottom: 40, left: 10 }; 
          
          const legendContainer = container.append("svg")
                                           .attr("width", legendWidth + legendMargin.left + legendMargin.right)
@@ -142,9 +176,10 @@
             return "NA/0";
           };
 
-         const legendTextY = [legendMargin.top + 10, (legendHeight / 2) + legendMargin.top, legendHeight + legendMargin.top - 10];
-         const legendText = [ formatValue(maxValue), formatValue((minValue + maxValue) / 2), formatValue(minValue) ];
-         legendContainer.selectAll("text")
+          const legendTextY = [legendMargin.top - 30, legendMargin.top - 10, legendMargin.top + 10, (legendHeight / 2) + legendMargin.top , legendHeight + legendMargin.top - 10];
+          const legendText = ["Mean: " + formatValue(mean), "Std: " + formatValue(std), formatValue(maxValue), formatValue((minValue + maxValue) / 2), formatValue(minValue)];
+          
+          legendContainer.selectAll("text")
                         .data(legendText)
                         .enter()
                         .append("text")
@@ -162,7 +197,6 @@
   function update(){
     const selectedYear = d3.select("#value").text();
     year = parseInt(selectedYear);
-    svg.selectAll("path").remove();
 
     d3.json("world_map.json").then(function (mapData) {
       d3.csv("../dataset/data_renewable_electricity.csv").then(function (arrayData) {
@@ -172,10 +206,10 @@
 
         arrayData.forEach((d) => {
           const country = d["Entity"];
-          const value_wind = parseFloat(d["Electricity from wind (TWh)"]);
-          const value_hydro = parseFloat(d["Electricity from hydro (TWh)"]);
-          const value_solar = parseFloat(d["Electricity from solar (TWh)"]);
-          const value_other = parseFloat(d["Other renewables including bioenergy (TWh)"]);
+          const value_wind = parseFloat(d["Electricity from wind (TWh)"]) || 0;
+          const value_hydro = parseFloat(d["Electricity from hydro (TWh)"]) || 0;
+          const value_solar = parseFloat(d["Electricity from solar (TWh)"]) || 0;
+          const value_other = parseFloat(d["Other renewables including bioenergy (TWh)"]) || 0;
           const value = value_wind + value_hydro + value_solar + value_other;
           if (dataDict[country] == null ){dataDict[country] = 0;}
           if (!excludedCountries.includes(country) && d["Year"] === String(year)) {
@@ -183,7 +217,6 @@
           }
         });
 
-        console.log(dataDict);
 
         mapData.features.forEach((feature) => {
           const country = feature.properties.name;
@@ -194,23 +227,34 @@
   
         let minValue = Infinity;
         let maxValue = -Infinity;
-  
+        let sum = 0;
+        let squaredDiffSum = 0;
+        let count = 0;
+        
         for (const country in dataDict) {
           if (!excludedCountries.includes(country)) {
             const value = dataDict[country];
-            if(value != null){
-              if (value < minValue){
-                minValue = value;
-              }
-              if (value > maxValue){
-                maxValue = value;
-              }
+            if (value < minValue) {
+              minValue = value;
             }
-            else {
-              dataDict[country] = 0;
+            if (value > maxValue) {
+              maxValue = value;
             }
+            sum += value;
+            count++;
           }
         }
+        
+        const mean = sum / count;
+        
+        for (const country in dataDict) {
+          if (!excludedCountries.includes(country)) {
+            const value = dataDict[country];
+            squaredDiffSum += (value - mean) ** 2;
+          }
+        }
+        
+        const std = Math.sqrt(squaredDiffSum / count);
   
         const colorScale = d3.scaleSequential()
                              .interpolator(d3.interpolateRgb("steelblue", "brown"))
@@ -229,33 +273,51 @@
                           .style("font-size", "12px")
                           .style("color", "black");
 
-        svg.selectAll("path")
-           .data(mapData.features)
-           .enter()
-           .append("path")
-           .attr("d", path)
-           .attr("fill", (d) => {
-             const value = d.properties.value;
-             return value ? colorScale(value) : "gray";
-           })
-           .on("mouseover", (event, d) => {
-              tooltip.transition()
-                     .duration(200)
-                     .style("opacity", 0.9);
-              tooltip.html(`Country: ${d.properties.name}<br>Year: ${year}<br>Renewable energy production: ${formatValue(d.properties.value)}`)
-                     .style("left", (event.pageX) + "px")
-                     .style("top", (event.pageY - 28) + "px");
-           })
-           .on("mouseout", () => {
-              tooltip.transition()
-                     .duration(500)
-                     .style("opacity", 0);
-           });
+        const paths = svg.selectAll("path")
+                         .data(mapData.features);
+  
+        paths.transition()
+            .duration(200)
+            .attr("fill", (d) => {
+                const value = d.properties.value;
+                return value ? colorScale(value) : "gray";
+            });
+  
+        paths.enter()
+            .append("path")
+            .attr("d", path)
+            .attr("fill", "gray")
+            .transition()
+            .duration(200)
+            .attr("fill", (d) => {
+                const value = d.properties.value;
+                return value ? colorScale(value) : "gray";
+            });
+  
+        paths.exit()
+            .transition()
+            .duration(10)
+            .attr("fill", "gray")
+            .remove();
+  
+        paths.on("mouseover", (event, d) => {
+          tooltip.transition()
+                .duration(200)
+                .style("opacity", 0.9);
+                tooltip.html(`Country: ${d.properties.name}<br>Year: ${year}<br>CO2 Emissions: ${formatValue(d.properties.value)}`)            
+                        .style("left", (event.pageX) + "px")
+                        .style("top", (event.pageY - 18) + "px");
+                })
+                .on("mouseout", () => {
+                  tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });
 
           //Legend
           const legendWidth = 80;
           const legendHeight = 200;
-          const legendMargin = { top: 20, right: 10, bottom: 20, left: 10 }; 
+          const legendMargin = { top: 70, right: 10, bottom: 40, left: 10 }; 
 
           const formatValue = (value) => {
             if (value !== null) {
@@ -268,9 +330,9 @@
           };
 
           const legendContainer = d3.select("body").select("div").select("svg.legend-svg");
-          const legendTextY = [legendMargin.top + 10, (legendHeight / 2) + legendMargin.top, legendHeight + legendMargin.top - 10];
-          const legendText = [ formatValue(maxValue), formatValue((minValue + maxValue) / 2), formatValue(minValue) ];
-
+          const legendTextY = [legendMargin.top - 30, legendMargin.top - 10, legendMargin.top + 10, (legendHeight / 2) + legendMargin.top , legendHeight + legendMargin.top - 10];
+          const legendText = ["Mean: " + formatValue(mean), "Std: " + formatValue(std), formatValue(maxValue), formatValue((minValue + maxValue) / 2), formatValue(minValue)];
+          
           legendContainer.selectAll("text")
                          .data(legendText)
                          .join("text")
@@ -342,6 +404,42 @@
 
   update();
 
+  const createHTMLElement = (tag, text) => {
+    const element = document.createElement(tag);
+    element.innerHTML = text;
+    return element;
+  };
+  
+  const container2 = document.createElement("div");
+  const heading1 = createHTMLElement("h1", "Renewable Energy Production Heat Map Analysis");
+  container2.appendChild(heading1);
+  const heading2 = createHTMLElement("h2", "Observations on Renewable Energy Production Heat Map");
+  container2.appendChild(heading2);
+
+  const observation = "The heat map of renewable energy production from 1965 to 2022 provides valuable insights into the global trends and changes in renewable energy generation over time. The heat map visualizes the varying levels of renewable energy production across different countries and regions, highlighting the growth and adoption of clean energy sources. Here are some key observations from the heat map analysis:"
+  const observationParagraph = createHTMLElement("p", observation);
+  container2.appendChild(observationParagraph);
+  const analysisList = createHTMLElement("ul", "");
+  container2.appendChild(analysisList);
+  
+  const observations = [
+  "<strong><u>1. Overall Growth: </u></strong> The heat map reveals a significant overall growth in global renewable energy production from 1965 to 2022. This upward trend is driven by factors such as increasing awareness of climate change, government incentives, and advancements in renewable energy technologies.",
+  "<strong><u>2. Regional Disparities:</u></strong> The heat map highlights regional disparities in renewable energy production. Countries with abundant renewable resources, such as solar, wind, and hydro, tend to have higher production levels. This includes regions like Europe, the United States, China, and parts of Latin America.",
+  "<strong><u>3. Transitioning Economies:</u></strong> The heat map also shows the increasing renewable energy production in transitioning economies, including India and Brazil. These countries are investing in renewable energy as part of their sustainable development goals and reducing dependence on fossil fuels.",
+  "<strong><u>4. Technological Advancements:</u></strong> The heat map analysis demonstrates the influence of technological advancements in driving renewable energy production. Countries at the forefront of renewable energy technologies, such as Germany and Denmark, show higher production levels.",
+  "<strong><u>5. Policy Support:</u></strong> The heat map underscores the role of supportive policies in fostering renewable energy production. Countries with robust renewable energy policies and feed-in tariffs, such as Germany and Spain, have seen significant growth in their renewable energy sectors.",
+  "<strong><u>6. Diversification of Energy Mix:</u></strong> The heat map analysis reveals the diversification of energy sources in some countries. As renewable energy sources become more cost-effective, countries like Iceland and Norway have shifted a significant portion of their energy production to renewable sources, particularly geothermal and hydropower.",
+  "<strong><u>7. Challenges and Constraints:</u></strong> The heat map can also highlight the challenges and constraints faced by countries in increasing renewable energy production. Factors such as limited renewable resources, grid integration issues, and policy barriers can impact the growth of renewable energy in certain regions.",
+  "<strong><u>8. Future Potential:</u></strong> The heat map analysis provides insights into the future potential for renewable energy production. Countries with untapped renewable resources, such as parts of Africa and Southeast Asia, have the opportunity to harness these sources for sustainable energy production.",
+  "<strong><u>9. Decentralized Energy Systems:</u></strong> The heat map analysis may reveal the emergence of decentralized energy systems. Countries with high levels of distributed renewable energy production, such as rooftop solar installations, indicate a shift towards localized energy generation and community-based initiatives."
+  ];
+
+  observations.forEach((observation) => {
+    const listItem = createHTMLElement("li", observation);
+    analysisList.appendChild(listItem);
+  });
+  document.body.appendChild(container2);
+  
    </script>
 
 </html> 

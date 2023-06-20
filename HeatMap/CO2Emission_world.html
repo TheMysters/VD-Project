@@ -19,10 +19,30 @@
           top: -10px;
           cursor: move;
         }
+        .button {
+          position: fixed;
+          top: 20px;
+          left: 20px;
+          padding: 10px;
+          background-color: #4CAF50;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        p {
+          margin-top: 20px;
+        }
+        h1 {
+          text-align: center;
+        }
+        li {
+          margin-bottom: 10px;
+        }
       </style>
    </head>
    <body>
-
+    <button class="button" onclick="window.location.href='/home.html'">Home</button>
    </body>
 
    <script>
@@ -78,22 +98,39 @@
 
         let minValue = Infinity;
         let maxValue = -Infinity;
-
+        let sum = 0;
+        let squaredDiffSum = 0;
+        let count = 0;
+        
         for (const country in dataDict) {
           if (!excludedCountries.includes(country)) {
             const value = dataDict[country];
-              if (value < minValue){
-                minValue = value;
-              }
-              if (value > maxValue){
-                maxValue = value;
-              }
+            if (value < minValue) {
+              minValue = value;
             }
+            if (value > maxValue) {
+              maxValue = value;
+            }
+            sum += value;
+            count++;
+          }
         }
+        
+        const mean = sum / count;
+        
+        for (const country in dataDict) {
+          if (!excludedCountries.includes(country)) {
+            const value = dataDict[country];
+            squaredDiffSum += (value - mean) ** 2;
+          }
+        }
+        
+        const std = Math.sqrt(squaredDiffSum / count);
+
          //Legend
          const legendWidth = 80;
          const legendHeight = 200;
-         const legendMargin = { top: 20, right: 10, bottom: 20, left: 10 };
+         const legendMargin = { top: 70, right: 30, bottom: 40, left: 30 }; 
          
          const legendContainer = container.append("svg")
                                           .attr("width", legendWidth + legendMargin.left + legendMargin.right)
@@ -124,38 +161,38 @@
                         .attr("width", legendWidth)
                         .attr("height", legendHeight)
                         .style("fill", "url(#gradient)");
- 
+              
           const formatValue = (value) => {
-            if (value !== null) {
-              if (Math.abs(value) >= 1e9) {return (value / 1e9).toFixed(2) + "G";} 
-              else if (Math.abs(value) >= 1e6) {return (value / 1e6).toFixed(2) + "M";} 
-              else if (Math.abs(value) >= 1e3) {return (value / 1e3).toFixed(2) + "k";} 
-              else {return value.toFixed(2);}
-            }
-            return "NA/0";
-          };
+              if (value !== null) {
+                const expValue = Math.exp(value);
+                if (Math.abs(expValue) >= 1e9) {return (expValue / 1e9).toFixed(2) + "G";} 
+                else if (Math.abs(expValue) >= 1e6) {return (expValue / 1e6).toFixed(2) + "M";} 
+                else if (Math.abs(expValue) >= 1e3) {return (expValue / 1e3).toFixed(2) + "k";} 
+                else {return expValue.toFixed(2);}
+              }
+              return "NA/0";
+            };
          
-         const legendTextY = [legendMargin.top + 10, (legendHeight / 2) + legendMargin.top, legendHeight + legendMargin.top - 10];
-         const legendText = [ formatValue(maxValue), formatValue((minValue + maxValue) / 2), formatValue(minValue) ];
-         legendContainer.selectAll("text")
-                        .data(legendText)
-                        .enter()
-                        .append("text")
-                        .attr("x", legendMargin.left + legendWidth - 5)
-                        .attr("y", (d, i) => legendTextY[i])
-                        .attr("text-anchor", "end")
-                        .attr("dominant-baseline", "middle")
-                        .style("fill", "black")
-                        .style("font-size", "16px")
-                        .style("font-weight", "bold") 
-                        .text((d) => d);
+          const legendTextY = [legendMargin.top - 30, legendMargin.top - 10, legendMargin.top + 10, (legendHeight / 2) + legendMargin.top , legendHeight + legendMargin.top - 10];
+          const legendText = ["Mean: " + formatValue(mean), "Std: " + formatValue(std), formatValue(maxValue), formatValue((minValue + maxValue) / 2), formatValue(minValue)];
+          
+          legendContainer.selectAll("text")
+                         .data(legendText)
+                         .join("text")
+                         .attr("x", legendMargin.left + legendWidth - 5)
+                         .attr("y", (d, i) => legendTextY[i])
+                         .attr("text-anchor", "end")
+                         .attr("dominant-baseline", "middle")
+                         .style("fill", "black")
+                         .style("font-size", "16px")
+                         .style("font-weight", "bold") 
+                         .text((d) => d);
     });
   });
 
   function update(){
     const selectedYear = d3.select("#value").text();
     year = parseInt(selectedYear);
-    svg.selectAll("path").remove();
 
     d3.json("world_map.json").then(function (mapData) {
       d3.csv("../dataset/data_co2_limited.csv").then(function (arrayData) {
@@ -165,9 +202,10 @@
   
         arrayData.forEach((d) => {
           const country = d["country_name"];
-          const value = parseFloat(d["value"]);
+          let value = parseFloat(d["value"]);
           if (!excludedCountries.includes(country) && d["year"] === String(year)) {
-            dataDict[country] = value; //Kilotons
+            if (value <= 0) {value = 1};
+            dataDict[country] = Math.log(value); //Kilotons
           }
         });
   
@@ -177,21 +215,37 @@
   
           feature.properties.value = value || null;
         });
-  
+
         let minValue = Infinity;
         let maxValue = -Infinity;
-  
+        let sum = 0;
+        let squaredDiffSum = 0;
+        let count = 0;
+        
         for (const country in dataDict) {
           if (!excludedCountries.includes(country)) {
             const value = dataDict[country];
-            if (value < minValue){
+            if (value < minValue) {
               minValue = value;
             }
-            if (value > maxValue){
+            if (value > maxValue) {
               maxValue = value;
             }
+            sum += Math.exp(value);
+            count++;
           }
         }
+        
+        const mean = sum / count;
+        
+        for (const country in dataDict) {
+          if (!excludedCountries.includes(country)) {
+            const value = dataDict[country];
+            squaredDiffSum += (Math.exp(value) - mean) ** 2;
+          }
+        }
+        
+        const std = Math.sqrt(squaredDiffSum / count);
   
         const colorScale = d3.scaleSequential()
                              .interpolator(d3.interpolateRgb("steelblue", "brown"))
@@ -210,60 +264,89 @@
                           .style("font-size", "12px")
                           .style("color", "black");
 
-        svg.selectAll("path")
-           .data(mapData.features)
-           .enter()
-           .append("path")
-           .attr("d", path)
+      const paths = svg.selectAll("path")
+                       .data(mapData.features);
+
+      paths.transition()
+           .duration(200)
            .attr("fill", (d) => {
-             const value = d.properties.value;
-             return value ? colorScale(value) : "gray";
-           })
-           .on("mouseover", (event, d) => {
-              tooltip.transition()
-                     .duration(200)
-                     .style("opacity", 0.9);
-              tooltip.html(`Country: ${d.properties.name}<br>Year: ${year}<br>CO2 Emissions: ${formatValue(d.properties.value)}`)
-                     .style("left", (event.pageX) + "px")
-                     .style("top", (event.pageY - 28) + "px");
-           })
-           .on("mouseout", () => {
-              tooltip.transition()
-                     .duration(500)
-                     .style("opacity", 0);
+              const value = d.properties.value;
+              return value ? colorScale(value) : "gray";
            });
 
-          //Legend
-          const legendWidth = 80;
-          const legendHeight = 200;
-          const legendMargin = { top: 20, right: 10, bottom: 20, left: 10 }; 
+      paths.enter()
+           .append("path")
+           .attr("d", path)
+           .attr("fill", "gray")
+           .transition()
+           .duration(200)
+           .attr("fill", (d) => {
+              const value = d.properties.value;
+              return value ? colorScale(value) : "gray";
+           });
 
-          const formatValue = (value) => {
-            if (value !== null) {
-              if (Math.abs(value) >= 1e9) {return (value / 1e9).toFixed(2) + "G";} 
-              else if (Math.abs(value) >= 1e6) {return (value / 1e6).toFixed(2) + "M";} 
-              else if (Math.abs(value) >= 1e3) {return (value / 1e3).toFixed(2) + "k";} 
-              else {return value.toFixed(2);}
-            }
-            return "NA/0";
-          };
+      paths.exit()
+           .transition()
+           .duration(10)
+           .attr("fill", "gray")
+           .remove();
 
-          const legendContainer = d3.select("body").select("div").select("svg.legend-svg");
-          const legendTextY = [legendMargin.top + 10, (legendHeight / 2) + legendMargin.top, legendHeight + legendMargin.top - 10];
-          const legendText = [ formatValue(maxValue), formatValue((minValue + maxValue) / 2), formatValue(minValue) ];
+      paths.on("mouseover", (event, d) => {
+        tooltip.transition()
+               .duration(200)
+               .style("opacity", 0.9);
+               tooltip.html(`Country: ${d.properties.name}<br>Year: ${year}<br>CO2 Emissions: ${formatValue(d.properties.value)}`)            
+                      .style("left", (event.pageX) + "px")
+                      .style("top", (event.pageY - 18) + "px");
+               }) 
+              .on("mouseout", () => {
+                tooltip.transition()
+                       .duration(500)
+                       .style("opacity", 0);
+              });
 
-          legendContainer.selectAll("text")
-                         .data(legendText)
-                         .join("text")
-                         .attr("x", legendMargin.left + legendWidth - 5)
-                         .attr("y", (d, i) => legendTextY[i])
-                         .attr("text-anchor", "end")
-                         .attr("dominant-baseline", "middle")
-                         .style("fill", "black")
-                         .style("font-size", "16px")
-                         .style("font-weight", "bold") 
-                         .text((d) => d);
-       
+      //Legend
+      const legendWidth = 80;
+      const legendHeight = 200;
+      const legendMargin = { top: 70, right: 30, bottom: 40, left: 30 }; 
+
+      const formatValue = (value) => {
+        if (value !== null) {
+          const expValue = Math.exp(value);
+          if (Math.abs(expValue) >= 1e9) {return (expValue / 1e9).toFixed(2) + "G";} 
+          else if (Math.abs(expValue) >= 1e6) {return (expValue / 1e6).toFixed(2) + "M";} 
+          else if (Math.abs(expValue) >= 1e3) {return (expValue / 1e3).toFixed(2) + "k";} 
+          else {return expValue.toFixed(2);}
+        }
+        return "NA/0";
+      };
+
+      const formatValueBis = (value) => {
+        if (value !== null) {
+          if (Math.abs(value) >= 1e9) {return (value / 1e9).toFixed(2) + "G";} 
+          else if (Math.abs(value) >= 1e6) {return (value / 1e6).toFixed(2) + "M";} 
+          else if (Math.abs(value) >= 1e3) {return (value / 1e3).toFixed(2) + "k";} 
+          else {return value.toFixed(2);}
+        }
+        return "NA/0";
+      };
+
+      const legendContainer = d3.select("body").select("div").select("svg.legend-svg");
+      const legendTextY = [legendMargin.top - 30, legendMargin.top - 10, legendMargin.top + 10, (legendHeight / 2) + legendMargin.top , legendHeight + legendMargin.top - 10];
+      const legendText = ["Mean: " + formatValueBis(mean), "Std: " + formatValueBis(std), formatValue(maxValue), formatValue((minValue + maxValue) / 2), formatValue(minValue)];
+
+      legendContainer.selectAll("text")
+                      .data(legendText)
+                      .join("text")
+                      .attr("x", legendMargin.left + legendWidth - 5 )
+                      .attr("y", (d, i) => legendTextY[i])
+                      .attr("text-anchor", "end")
+                      .attr("dominant-baseline", "middle")
+                      .style("fill", "black")
+                      .style("font-size", "16px")
+                      .style("font-weight", "bold") 
+                      .text((d) => d);
+    
       });
     });
   } 
@@ -322,7 +405,42 @@
   button.call(drag);
 
   update();
-
+  
+  const createHTMLElement = (tag, text) => {
+    const element = document.createElement(tag);
+    element.innerHTML = text;
+    return element;
+  };
+  
+  const container2 = document.createElement("div");
+  const heading1 = createHTMLElement("h1", "CO2 Emissions Heat Map Analysis");
+  container2.appendChild(heading1);
+  const heading2 = createHTMLElement("h2", "Observations on CO2 Emissions Heat Map");
+  container2.appendChild(heading2);
+  
+  const observation = "The heat map of CO2 emissions from 1960 to 2020 provides valuable insights into the global trends and changes in CO2 emissions over time. The heat map visualizes the varying levels of CO2 emissions across different countries and regions, highlighting the significant impact of industrialization, energy consumption, and economic growth on carbon emissions. Here are some key observations from the heat map analysis:"
+  const observationParagraph = createHTMLElement("p", observation);
+  container2.appendChild(observationParagraph);
+  const analysisList = createHTMLElement("ul", "");
+  container2.appendChild(analysisList);
+  
+  const observations = [
+  "<strong><u>1. Overall Increase: </u></strong> The heat map reveals a significant overall increase in global CO2 emissions from 1960 to 2020. This upward trend is driven by factors such as population growth, expanding economies, and the widespread use of fossil fuels.",
+  "<strong><u>2. Regional Disparities: </u></strong> The heat map highlights regional disparities in CO2 emissions. Developed countries, such as the United States, China, and European nations, tend to have higher emissions due to their industrial activities and energy consumption.",
+  "<strong><u>3. Emerging Economies: </u></strong> The heat map also shows the rising CO2 emissions from emerging economies, including India and Brazil. These countries have experienced rapid industrialization and increased energy demands, leading to higher carbon emissions.",
+  "<strong><u>4. Fluctuations and Changes: </u></strong> The heat map demonstrates fluctuations and changes in CO2 emissions over time. Factors such as economic recessions, energy policies, and advancements in clean energy technologies contribute to these variations.",
+  "<strong><u>5. Historical Perspective: </u></strong> Analyzing the heat map provides a historical perspective on the evolution of CO2 emissions. It helps us understand the impact of past policies, technological advancements, and societal changes on carbon emissions.",
+  "<strong><u>6. Importance of Mitigation: </u></strong> The heat map underscores the importance of implementing measures to mitigate CO2 emissions. It serves as a reminder of the urgent need for transitioning to cleaner energy sources, promoting energy efficiency, and adopting sustainable practices globally.",
+  "<strong><u>7. Climate Change Implications: </u></strong> The heat map's analysis of CO2 emissions reinforces the link between carbon emissions and climate change. High-emitting regions face greater challenges in mitigating the adverse effects of global warming and should prioritize sustainable strategies.",
+  "<strong><u>8. Variations in Mean and Standard Deviation: </u></strong> The heat map showcases significant variations in the mean and standard deviation of CO2 emissions across different countries and regions. These variations highlight the differences in emission levels and the diversity of emission profiles around the world.",
+  "<strong><u>9. Impact of Policy and Technological Advancements: </u></strong> The heat map analysis can also reveal the impact of policy decisions and technological advancements on CO2 emissions. Countries implementing effective emission reduction policies or adopting renewable energy technologies may show a distinct pattern in the heat map."
+  ];
+  
+  observations.forEach((observation) => {
+    const listItem = createHTMLElement("li", observation);
+    analysisList.appendChild(listItem);
+  });
+  document.body.appendChild(container2);
    </script>
 
 </html> 

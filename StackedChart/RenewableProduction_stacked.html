@@ -3,11 +3,27 @@
   <head>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-
+      .button {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        padding: 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      p {
+        margin-top: 20px;
+      }
+      h1 {
+        text-align: center;
+      }
     </style>
   </head>
   <body>
-
+    <button class="button" onclick="window.location.href='/home.html'">Home</button>
   </body>
 
   <script>
@@ -227,7 +243,43 @@
             .attr("y", 150 + 6 * 20)
             .style("fill", "gray")
             .text("Other");
-
+        const createHTMLElement = (tag, text) => {
+          const element = document.createElement(tag);
+          element.innerHTML = text;
+          return element;
+        };
+        
+        // Create the main container
+        const container2 = document.createElement("div");
+        
+        // Add the main heading
+        const heading1 = createHTMLElement("h1", "Renewable Energy Production Analysis");
+        container2.appendChild(heading1);
+        
+        // Add the observations heading
+        const heading2 = createHTMLElement("h2", "Observations on Renewable Energy Production");
+        container2.appendChild(heading2);
+        
+        // Add the observations for each country
+        const observations = [
+          { country: "France & United Kingdom", observation: "The renewable energy production for France & United Kingdom shows a consistent level over time, indicating a relatively stable production. This could be attributed to significant investments in renewable energy sources, such as wind and solar power, which contribute to a sustainable energy mix with low carbon emissions." },
+          { country: "United States", observation: "The renewable energy production for the United States exhibits a gradual increase over time. This indicates a growing focus on renewable energy sources, including wind, solar, and hydropower, as part of efforts to reduce reliance on fossil fuels and mitigate carbon emissions." },
+          { country: "Russia", observation: "The renewable energy production for Russia is relatively low compared to other countries. Russia's energy sector is dominated by fossil fuels, such as natural gas and coal, which limits the share of renewable energy in the overall production. However, there are ongoing efforts to increase renewable energy capacity in the country." },
+          { country: "China", observation: "The renewable energy production for China has shown significant growth in recent years. China has been actively investing in renewable energy, particularly in solar and wind power, to reduce dependence on coal and address environmental concerns. These efforts have resulted in a substantial increase in renewable energy production." },
+          { country: "India", observation: "The renewable energy production for India has witnessed significant progress in recent years. India has set ambitious targets for renewable energy capacity, including solar and wind power, to diversify its energy mix and reduce carbon emissions. The country has made substantial investments in renewable energy infrastructure and is experiencing a steady increase in production." },
+          { country: "Other", observation: "The renewable energy production for the rest of the world contributes to the global efforts but may not be as significant as the larger countries. However, various countries are actively working towards increasing their renewable energy production to contribute to a sustainable and low-carbon future." }
+        ];
+        
+        observations.forEach(({ country, observation }) => {
+          const countryHeading = createHTMLElement("h3", country);
+          const countryObservation = createHTMLElement("p", observation);
+          container2.appendChild(countryHeading);
+          container2.appendChild(countryObservation);
+        });
+        
+        // Append the container to the body
+        document.body.appendChild(container2);
+          
     });
       
 </script>
