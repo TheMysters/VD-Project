@@ -153,11 +153,11 @@
          
          gradient.append("stop")
                  .attr("offset", "0%")
-                 .attr("stop-color", "blue");
+                 .attr("stop-color", "brown");
          
          gradient.append("stop")
                  .attr("offset", "100%")
-                 .attr("stop-color", "red");
+                 .attr("stop-color", "steelblue");
          
          legendContainer.append("rect")
                         .attr("x", legendMargin.left)
@@ -257,7 +257,7 @@
         const std = Math.sqrt(squaredDiffSum / count);
   
         const colorScale = d3.scaleSequential()
-                             .interpolator(d3.interpolateRgb("steelblue", "brown"))
+                             .interpolator(d3.interpolateRgb("brown", "steelblue"))
                              .domain([minValue, maxValue]);
 
         //Render the map
